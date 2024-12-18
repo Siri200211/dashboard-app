@@ -1,0 +1,114 @@
+/* Home Container */
+.home-container {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom right, #0571eb, #222);
+    opacity: 0; /* Start invisible */
+    transform: scale(0.98); /* Slightly smaller scale */
+    filter: blur(5px); /* Reduced blur */
+    animation: fadeInBlur 1s ease-out forwards; /* Shorter duration */
+  }
+  
+  /* Animation for fade-in and blur effect */
+  @keyframes fadeInBlur {
+    0% {
+      opacity: 0;
+      transform: scale(0.98);
+      filter: blur(5px); /* Less blur */
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+  }
+  
+  /* Banner Section */
+  .home-banner {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .logo-container {
+    margin-bottom: 20px;
+  }
+  
+  .home-logo {
+    height: 150px; /* Larger image size */
+    width: auto; /* Maintain aspect ratio */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3); /* Soft shadow for a floating effect */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth animation */
+  }
+  
+  /* Hover effect for the logo */
+  .home-logo:hover {
+    transform: scale(1.1); /* Slight zoom-in effect */
+    box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.4); /* Intensified shadow on hover */
+  }
+  
+  .home-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+  
+  .home-subtitle {
+    font-size: 1.5rem;
+    color: #d3d3d3;
+  }
+  
+  /* Cards Section */
+  .home-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+  }
+  
+  .home-card {
+    background: white;
+    color: #0571eb;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 20px 30px;
+    width: 250px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* Hover effect for cards */
+  .home-card:hover {
+    transform: translateY(-10px); /* Lift the card on hover */
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3); /* Intensified shadow on hover */
+  }
+  
+  .home-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .home-card p {
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .home-cards {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .home-card {
+      width: 90%;
+    }
+  }
+  

@@ -1,0 +1,130 @@
+/* Navbar */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 30px;
+    background-color: #222;
+    color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  /* Navbar Container */
+  .navbar-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+  }
+  
+  /* Logo Section */
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo {
+    height: 40px;
+    width: auto;
+  }
+  
+  .navbar-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    letter-spacing: 1px;
+  }
+  
+  /* Right-Aligned Dynamic Title */
+  .navbar-right {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .right-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  
+  /* Navigation Menu */
+  .nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+    margin: 0;
+  }
+  
+  .nav-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-links {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .nav-links:hover {
+    color: #0571eb;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: column;
+      padding: 10px 20px;
+    }
+  
+    .nav-menu {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .navbar-right {
+      position: static;
+      transform: none;
+      margin-top: 10px;
+    }
+  }
+  /* Import Button */
+.navbar-button {
+    position: absolute;
+    right: 20px; /* Align to the right */
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .import-button {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    background-color: #0571eb; /* Primary button color */
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .import-button:hover {
+    background-color: #005bb5; /* Darker blue on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+  }
+  

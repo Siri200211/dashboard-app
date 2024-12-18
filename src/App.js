@@ -1,24 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Overview from './components/Overview'; // Example component
+import FiberStatisticsPage from './components/FiberStatisticsPage';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import CsvUploadPage from './components/CsvUploadPage'; // Your CsvUploadPage component
+import FiberOrders from './components/FiberOrders';
+import CombinedReports from './components/CombinedReports';
+import Navbar from './components/Navbar';
+import HomePage from './components/HomePage';
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+            <Navbar/>
+      <Routes>
+        <Route path="/peo" element={<Overview />} />
+        <Route path="/import" element={<CsvUploadPage />} />
+        <Route path="/fiber" element={<FiberOrders/>} />
+        <Route path="/all" element={<CombinedReports/>} />
+        <Route path="/" element={<HomePage/>} />
+        <Route path="/statistics" element={<FiberStatisticsPage/>} />
+      </Routes>
+    </Router>
   );
 }
 
