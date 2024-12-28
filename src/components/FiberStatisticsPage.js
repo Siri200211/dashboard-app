@@ -88,10 +88,10 @@ const FiberStatisticsPage = () => {
       case "PEO_NEW_53K - E-IPTV COPPER - CREATE":
         aggregatedCounts["PEO TV NEW ACCESS BAERER (COPPER)"] += item.count;
         break;
-      case "PEO DP BB Up_30K - E-IPTV FTTH - CREATE":
+      case "PEO_DP BB Up_30K - E-IPTV FTTH - CREATE":
         aggregatedCounts["PEO TV BB UP (FIBER)"] += item.count;
         break;
-      case "PEO DP BB Up_30K - E-IPTV COPPER - CREATE":
+      case "PEO_DP BB Up_30K - E-IPTV COPPER - CREATE":
         aggregatedCounts["PEO TV BB UP (COPPER)"] += item.count;
         break;
       case "PEO_REC_6K - E-IPTV FTTH - CREATE-RECON":
@@ -154,25 +154,53 @@ const FiberStatisticsPage = () => {
       : 0;
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "linear-gradient(to right, #141E30, #243B55)", padding: 4 }}>
-      <Typography variant="h3" gutterBottom sx={{ textAlign: "center", color: "#fff", fontWeight: "bold", textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: `url(/BG.jpg)`, // Background image from public folder
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        padding: 4,
+        background: `url(/BG.jpg), linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7))`, // Darker gradient to make background more dim
+      }}
+    >
+      <Typography
+        variant="h3"
+        gutterBottom
+        sx={{
+          textAlign: "center",
+          color: "#fff",
+          fontWeight: "bold",
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)",
+        }}
+      >
         Fiber & Copper Statistics
       </Typography>
       <Container maxWidth="lg">
         <Grid container spacing={4}>
-          {/* Fiber Statistics Section (Blue) */}
+          {/* Fiber Statistics Section (Blue Gradient) */}
           <Grid item xs={12}>
-            <Typography variant="h5" sx={{ color: "#1976D2", fontWeight: "bold", marginBottom: 2 }}>
+            <Typography variant="h5" sx={{ color: "#FFFFFF", fontWeight: "bold", marginBottom: 2 }}>
               Fiber Statistics
             </Typography>
           </Grid>
           {[
-            { label: "NEW FTTH", percentage: fiberNewAccessPercentage, color: "#1976D2" },
-            { label: "MIGRATION", percentage: fiberMigrationPercentage, color: "#1976D2" },
-            { label: "RECON FTTH", percentage: fiberReconPercentage, color: "#1976D2" },
+            { label: "NEW FTTH", percentage: fiberNewAccessPercentage, color: "linear-gradient(145deg, #0A237D, #0D47A1)" },
+            { label: "MIGRATION", percentage: fiberMigrationPercentage, color: "linear-gradient(145deg, #0A237D, #0D47A1)" },
+            { label: "RECON FTTH", percentage: fiberReconPercentage, color: "linear-gradient(145deg, #0A237D, #0D47A1)" },
           ].map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card sx={{ padding: 3, backgroundColor: item.color, color: "#fff", borderRadius: 2, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)", transition: "transform 0.3s ease", "&:hover": { transform: "scale(1.05)" } }}>
+              <Card
+                sx={{
+                  padding: 3,
+                  background: item.color,
+                  color: "#fff",
+                  borderRadius: 2,
+                  boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
+                  transition: "transform 0.3s ease",
+                  "&:hover": { transform: "scale(1.05)" },
+                }}
+              >
                 <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: 2 }}>
                   {item.label}
                 </Typography>
@@ -181,18 +209,28 @@ const FiberStatisticsPage = () => {
             </Grid>
           ))}
 
-          {/* Copper Statistics Section (Orange) */}
+          {/* Copper Statistics Section (Green Gradient) */}
           <Grid item xs={12}>
-            <Typography variant="h5" sx={{ color: "#F57C00", fontWeight: "bold", marginBottom: 2 }}>
+            <Typography variant="h5" sx={{ color: "#FFFFFF", fontWeight: "bold", marginBottom: 2 }}>
               Copper Statistics
             </Typography>
           </Grid>
           {[
-            { label: "NEW COPPER", percentage: copperNewPercentage, color: "#F57C00" },
-            { label: "RECON COPPER", percentage: copperReconPercentage, color: "#F57C00" },
+            { label: "NEW COPPER", percentage: copperNewPercentage, color: "linear-gradient(145deg, #1B5E20, #388E3C)" },
+            { label: "RECON COPPER", percentage: copperReconPercentage, color: "linear-gradient(145deg, #1B5E20, #388E3C)" },
           ].map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card sx={{ padding: 3, backgroundColor: item.color, color: "#fff", borderRadius: 2, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)", transition: "transform 0.3s ease", "&:hover": { transform: "scale(1.05)" } }}>
+              <Card
+                sx={{
+                  padding: 3,
+                  background: item.color,
+                  color: "#fff",
+                  borderRadius: 2,
+                  boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
+                  transition: "transform 0.3s ease",
+                  "&:hover": { transform: "scale(1.05)" },
+                }}
+              >
                 <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: 2 }}>
                   {item.label}
                 </Typography>

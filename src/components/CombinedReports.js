@@ -8,25 +8,7 @@ const CombinedReports = () => {
   return (
     <Box sx={{ margin: 0, padding: 0 }}>
 
-      {/* Fiber Orders Section */}
-      <Box sx={{ my: 0, py: 0 }}>
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: "bold",
-            textAlign: "center",
-            color: "#0571eb",
-            marginBottom: 0,
-            paddingBottom: 0,
-          }}
-        >
-          {/* Fiber Orders Title */}
-        </Typography>
-        <FiberOrders />
-      </Box>
-
-      {/* Divider Between Sections */}
-      <Divider sx={{ my: 0 }} />
+      
 
       {/* PEO TV Daily Sales Section */}
       <Box sx={{ my: 0, py: 0 }}>
@@ -45,8 +27,26 @@ const CombinedReports = () => {
         <Overview />
       </Box>
 
-      {/* Divider Between Sections */}
-      <Divider sx={{ my: 0 }} />
+       
+
+{/* Fiber Orders Section */}
+      <Box sx={{ my: 0, py: 0 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            color: "#0571eb",
+            marginBottom: 0,
+            paddingBottom: 0,
+          }}
+        >
+          {/* Fiber Orders Title */}
+        </Typography>
+        <FiberOrders />
+      </Box>
+
+  
 
       {/* Fiber Statistics Section */}
       <Box sx={{ my: 0, py: 0 }}>

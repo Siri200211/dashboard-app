@@ -13,7 +13,7 @@ import {
   Button,
 } from "@mui/material";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { getCounts } from "../services/api";
+import { getCounts } from "../services/api"; // Assuming you have an API service to fetch data
 
 const Overview = () => {
   const [counts, setCounts] = useState([]);
@@ -29,7 +29,7 @@ const Overview = () => {
     const fetchCounts = async () => {
       try {
         setLoading(true);
-        const data = await getCounts();
+        const data = await getCounts(); // Replace with your API call
         const formattedData = data.map((item) => ({
           category: item._id.category,
           orderType: item._id.oss_service_order_type,
@@ -159,10 +159,27 @@ const Overview = () => {
     .reduce((total, key) => total + aggregatedCounts[key], 0);
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "linear-gradient(to right, #141E30, #243B55)", padding: 4 }}>
-      <Typography variant="h3" gutterBottom sx={{ textAlign: "center", color: "#fff", fontWeight: "bold", textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}>
+    <Box sx={{ 
+      minHeight: "100vh", 
+      background: `url(/BG.jpg)`, // Add background image from public folder
+      backgroundSize: "cover", 
+      backgroundPosition: "center", 
+      padding: 4,
+      background: `url(/BG.jpg), linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7))`,  // Darker gradient to make background more dim
+    }}>
+      <Typography 
+        variant="h3" 
+        gutterBottom 
+        sx={{
+          textAlign: "center", 
+          color: "#fff", 
+          fontWeight: "bold", 
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)"
+        }}
+      >
         PEO TV DAILY SALES REPORT
       </Typography>
+
       <Container maxWidth="lg">
         {/* Filters */}
         <Grid container spacing={2} justifyContent="center" sx={{ marginBottom: 4 }}>
@@ -172,7 +189,7 @@ const Overview = () => {
               <Select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                sx={{ backgroundColor: "#FFFFFF", borderRadius: 2 }}
+                sx={{ backgroundColor: "#333333", color: "#FFFFFF", borderRadius: 2 }}
               >
                 <MenuItem value="all">All Years</MenuItem>
                 {years.map((year) => (
@@ -189,7 +206,7 @@ const Overview = () => {
               <Select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                sx={{ backgroundColor: "#FFFFFF", borderRadius: 2 }}
+                sx={{ backgroundColor: "#333333", color: "#FFFFFF", borderRadius: 2 }}
               >
                 <MenuItem value="all">All Months</MenuItem>
                 {months.map((month, index) => (
@@ -206,7 +223,7 @@ const Overview = () => {
               <Select
                 value={selectedDay}
                 onChange={(e) => setSelectedDay(e.target.value)}
-                sx={{ backgroundColor: "#FFFFFF", borderRadius: 2 }}
+                sx={{ backgroundColor: "#333333", color: "#FFFFFF", borderRadius: 2 }}
               >
                 <MenuItem value="all">All Days</MenuItem>
                 {days.map((day) => (
@@ -223,7 +240,13 @@ const Overview = () => {
               color="primary"
               fullWidth
               onClick={applyFilters}
-              sx={{ padding: "12px", fontWeight: "bold", textTransform: "none" }}
+              sx={{
+                padding: "12px", 
+                fontWeight: "bold", 
+                textTransform: "none", 
+                backgroundColor: "#1E88E5", 
+                ":hover": { backgroundColor: "#1565C0" }
+              }}
             >
               Apply Filters
             </Button>
@@ -233,11 +256,20 @@ const Overview = () => {
         {/* Data Display */}
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
-            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#FFFFFF", textAlign: "center" }}>Fiber Data - Total: {totalFiber}</Typography>
+            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#FFFFFF", textAlign: "center" }}>
+              Fiber Data - Total: {totalFiber}
+            </Typography>
             {Object.keys(aggregatedCounts)
               .filter((key) => key.includes("Fiber"))
               .map((key, index) => (
-                <Card sx={{ marginTop: 2, padding: 2, background: "linear-gradient(145deg, #1976D2, #2196F3)" }} key={index}>
+                <Card
+                  sx={{
+                    marginTop: 2,
+                    padding: 2,
+                    background: "linear-gradient(145deg, #0A237D, #0D47A1)",  // Darker blue gradient for Fiber
+                  }}
+                  key={index}
+                >
                   <Typography variant="h6" sx={{ color: "#fff", textAlign: "center" }}>{key}</Typography>
                   <Typography variant="h4" sx={{ color: "#fff", textAlign: "center" }}>{aggregatedCounts[key]}</Typography>
                 </Card>
@@ -245,11 +277,20 @@ const Overview = () => {
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#FFFFFF", textAlign: "center" }}>Copper Data - Total: {totalCopper}</Typography>
+            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#FFFFFF", textAlign: "center" }}>
+              Copper Data - Total: {totalCopper}
+            </Typography>
             {Object.keys(aggregatedCounts)
               .filter((key) => key.includes("Copper"))
               .map((key, index) => (
-                <Card sx={{ marginTop: 2, padding: 2, background: "linear-gradient(145deg, #FF5733, #FF7043)" }} key={index}>
+                <Card
+                  sx={{
+                    marginTop: 2,
+                    padding: 2,
+                    background: "linear-gradient(145deg, #1B5E20, #388E3C)",  // Darker green gradient for Copper
+                  }}
+                  key={index}
+                >
                   <Typography variant="h6" sx={{ color: "#fff", textAlign: "center" }}>{key}</Typography>
                   <Typography variant="h4" sx={{ color: "#fff", textAlign: "center" }}>{aggregatedCounts[key]}</Typography>
                 </Card>
