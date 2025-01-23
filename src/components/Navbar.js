@@ -5,10 +5,11 @@ import sltLogo from '../components/slt.png';
 
 const Navbar = () => {
   const location = useLocation();
+  const role = localStorage.getItem("role"); // Get the role from localStorage
 
-  // Do not render the navbar if we're on '/homeNew' page
-  if (location.pathname === '/') {
-    return null; // No navbar on /homeNew
+  // Do not render the navbar on specific routes
+  if (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/signup') {
+    return null;
   }
 
   // Determine the title based on the current route
@@ -17,9 +18,9 @@ const Navbar = () => {
   else if (location.pathname === '/peo') pageTitle = 'PEO TV';
   else if (location.pathname === '/fiber') pageTitle = 'ACCESS BAERER';
   else if (location.pathname === '/statistics') pageTitle = 'STATISTICS';
-  else if (location.pathname === '/disconnections') pageTitle = 'Disconnections';
+  else if (location.pathname === '/combine') pageTitle = 'Disconnections';
 
-  // Render full menu for pages like /, /peo, /import, /all, /fiber, /statistics
+  // Render full menu for main report pages
   const renderFullMenu = () => (
     <>
       <li className="nav-item">
@@ -37,17 +38,16 @@ const Navbar = () => {
     </>
   );
 
-  // Render limited menu for /home, /disconnections, and /importdisconn
+  // Render menu for disconnections and related pages
   const renderHomeAndDisconnectionsMenu = () => (
     <>
       <li className="nav-item">
-        <Link to="/disconnections" className="nav-links">DISCONNECTIONS</Link>
+        <Link to="/combine" className="nav-links">DISCONNECTIONS</Link>
       </li>
     </>
   );
 
-  // Always set "HOME" link to redirect to /homeNew
-  const homeLink = '/'; // Always redirect to /homeNew when "HOME" is clicked
+  const homeLink = '/'; // Redirect to home page
 
   return (
     <nav className="navbar">
@@ -55,7 +55,6 @@ const Navbar = () => {
         {/* Navbar Logo */}
         <div className="navbar-logo">
           <img src={sltLogo} alt="SLT Logo" className="logo" />
-          {/* HOME link */}
           <Link to={homeLink} className="navbar-title">
             HOME
           </Link>
@@ -68,25 +67,23 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Conditionally render menu items based on the current route */}
+        {/* Navigation Menu */}
         <ul className="nav-menu">
-          {/* Full menu for pages other than /home, /disconnections, and /importdisconn */}
-          {location.pathname !== '/home' && location.pathname !== '/disconnections' && location.pathname !== '/importdisconn' ? (
+          {location.pathname !== '/home' && location.pathname !== '/combine' && location.pathname !== '/importdisconn' ? (
             renderFullMenu()
           ) : (
-            // Limited menu for /home, /disconnections, and /importdisconn
             renderHomeAndDisconnectionsMenu()
           )}
         </ul>
 
-        {/* Import New Data Button */}
-        {location.pathname === '/homeNew' && (
+        {/* Import CSV File Button - only for admin */}
+        {role === 'admin' && location.pathname === '/homeNew' && (
           <div className="navbar-button">
             <Link to="/import" className="import-button">Import New Data</Link>
           </div>
         )}
 
-        {location.pathname === '/home' && (
+        {role === 'admin' && location.pathname === '/home' && (
           <div className="navbar-button">
             <Link to="/importdisconn" className="import-button">Import New Data</Link>
           </div>

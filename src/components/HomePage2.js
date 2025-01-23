@@ -102,7 +102,7 @@ const HomePage2 = () => {
 
       {/* Navigation Cards Section */}
       <div className="home-cards" style={{ marginTop: '30px' }}>
-        <Link to="/disconnections" className="home-card">
+        <Link to="/combine" className="home-card">
           <h2>Disconnection Report</h2>
           <p>Explore disconnection data in one place.</p>
         </Link>

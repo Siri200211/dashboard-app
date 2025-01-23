@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { Button, Input, Box, CircularProgress, Typography } from "@mui/material";
+import {
+  Button,
+  Input,
+  Box,
+  CircularProgress,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import axios from "axios";
 import "./DisconnectionCsvUpload.css"; // Import your custom CSS file
 
@@ -8,6 +19,7 @@ const DisconnectionCsvUpload = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false); // State to manage confirmation dialog
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -46,6 +58,18 @@ const DisconnectionCsvUpload = () => {
       setMessage("Error uploading CSV file.");
     } finally {
       setLoading(false);
+      setConfirmOpen(false); // Close the confirmation dialog after upload
+    }
+  };
+
+  const handleReplaceDataClick = () => {
+    setConfirmOpen(true); // Open confirmation dialog for replace data
+  };
+
+  const handleConfirmClose = (confirmed) => {
+    setConfirmOpen(false); // Close the dialog
+    if (confirmed) {
+      handleUpload(true); // Proceed with uploading and replacing data
     }
   };
 
@@ -71,7 +95,7 @@ const DisconnectionCsvUpload = () => {
           </Button>
           <Button
             variant="contained"
-            onClick={() => handleUpload(true)}
+            onClick={handleReplaceDataClick}
             disabled={loading}
             className="csv-button replace"
           >
@@ -85,6 +109,31 @@ const DisconnectionCsvUpload = () => {
           </Box>
         )}
         {message && <Typography className="csv-message">{message}</Typography>}
+
+        {/* Confirmation Dialog */}
+        <Dialog
+          open={confirmOpen}
+          onClose={() => handleConfirmClose(false)}
+        >
+          <DialogTitle>Confirm Data Replacement</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to replace the existing data? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => handleConfirmClose(false)} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handleConfirmClose(true)}
+              color="secondary"
+              variant="contained"
+            >
+              Yes, Replace Data
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </div>
   );

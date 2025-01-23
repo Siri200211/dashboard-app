@@ -14,7 +14,16 @@ export const getCounts = async () => {
 };
 export const getPeoTvCounts = async (queryString = "") => {
   try {
-    const response = await axios.get(`${API_URL}/get-peo-tv-counts${queryString}`);
+    const response = await axios.get(`${API_URL}/disconnection-counts${queryString}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching PEO TV counts:", error.message);
+    throw error;
+  }
+};
+export const getPeoTvCountsdis = async (queryString = "") => {
+  try {
+    const response = await axios.get(`${API_URL}/monthlyCounts${queryString}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching PEO TV counts:", error.message);

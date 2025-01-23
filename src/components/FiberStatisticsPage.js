@@ -12,12 +12,48 @@ import {
   FormControl,
 } from "@mui/material";
 import { getCounts } from "../services/api"; // Ensure this API function is correct
-
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 const FiberStatisticsPage = () => {
   const [counts, setCounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState("all");
+  // State to track line visibility
+const [lineVisibility, setLineVisibility] = useState({
+  fiberNewPercentage: true,
+  fiberReconPercentage: true,
+  fiberMigrationPercentage: true,
+  copperNewPercentage: true,
+  copperReconPercentage: true,
+});
 
+// Function to handle legend click for toggling lines
+const handleLegendClick = (e) => {
+  const { dataKey } = e; // The dataKey corresponds to the line’s key
+  setLineVisibility((prev) => ({
+    ...prev,
+    [dataKey]: !prev[dataKey], // Toggle visibility
+  }));
+};
+
+// Function to reset all lines visibility
+const resetAllLines = () => {
+  setLineVisibility({
+    fiberNewPercentage: true,
+    fiberReconPercentage: true,
+    fiberMigrationPercentage: true,
+    copperNewPercentage: true,
+    copperReconPercentage: true,
+  });
+};
   useEffect(() => {
     const fetchCounts = async () => {
       try {
@@ -55,7 +91,7 @@ const FiberStatisticsPage = () => {
   const filteredCounts =
     selectedMonth === "all"
       ? counts
-      : counts.filter((item) => item.month === selectedMonth - 1); // Adjust for 1-based selection
+      : counts.filter((item) => item.month === selectedMonth); // Adjust for 1-based selection
 
   const aggregatedCounts = {
     "FIBER NEW ACCESS BAERER": 0,
@@ -116,7 +152,87 @@ const FiberStatisticsPage = () => {
         break;
     }
   });
-
+  const months = [
+    "January", "February", "March", "April", "May",
+    "June", "July", "August", "September", "October",
+    "November", "December",
+  ];
+  
+  // Prepare data for line charts
+  const monthlyData = months.map((monthName, index) => {
+    const monthData = counts.filter((item) => item.month === index + 1); // Filter for each month
+    const monthlyAggregatedCounts = {
+      fiberNewAccess: 0,
+      peoTVFiberAccess: 0,
+      fiberMigration: 0,
+      peoTVMigration: 0,
+      fiberRecon: 0,
+      peoTVFiberRecon: 0,
+      copperNew: 0,
+      peoTVCopperAccess: 0,
+      copperRecon: 0,
+      peoTVCopperRecon: 0,
+    };
+  
+    monthData.forEach((item) => {
+      const combinedKey = `${item.category} - ${item.serviceType} - ${item.orderType}`;
+      switch (combinedKey) {
+        case "FTTH_NEW_132K - AB-FTTH - CREATE":
+          monthlyAggregatedCounts.fiberNewAccess += item.count;
+          break;
+        case "PEO_NEW_53K - E-IPTV FTTH - CREATE":
+          monthlyAggregatedCounts.peoTVFiberAccess += item.count;
+          break;
+        case "PEO_NEW_53K - E-IPTV FTTH - CREATE-UPGRD SAME NO":
+          monthlyAggregatedCounts.peoTVMigration += item.count;
+          break;
+        case "FTTH_NEW_132K - AB-FTTH - CREATE-UPGRD SAME NO":
+          monthlyAggregatedCounts.fiberMigration += item.count;
+          break;
+        case "FTTH_REC_31K - AB-FTTH - CREATE-RECON":
+          monthlyAggregatedCounts.fiberRecon += item.count;
+          break;
+        case "PEO_REC_6K - E-IPTV FTTH - CREATE-RECON":
+          monthlyAggregatedCounts.peoTVFiberRecon += item.count;
+          break;
+        case "Other - AB-CAB - CREATE":
+          monthlyAggregatedCounts.copperNew += item.count;
+          break;
+        case "PEO_NEW_53K - E-IPTV COPPER - CREATE":
+          monthlyAggregatedCounts.peoTVCopperAccess += item.count;
+          break;
+        case "Other - AB-CAB - CREATE-RECON":
+          monthlyAggregatedCounts.copperRecon += item.count;
+          break;
+        case "PEO_REC_6K - E-IPTV COPPER - CREATE-RECON":
+          monthlyAggregatedCounts.peoTVCopperRecon += item.count;
+          break;
+        default:
+          break;
+      }
+    });
+  
+    // Calculate percentages for each month
+    return {
+      month: monthName,
+      fiberNewPercentage: monthlyAggregatedCounts.fiberNewAccess > 0
+        ? ((monthlyAggregatedCounts.peoTVFiberAccess / monthlyAggregatedCounts.fiberNewAccess) * 100).toFixed(2)
+        : 0,
+      fiberReconPercentage: monthlyAggregatedCounts.fiberRecon > 0
+        ? ((monthlyAggregatedCounts.peoTVFiberRecon / monthlyAggregatedCounts.fiberRecon) * 100).toFixed(2)
+        : 0,
+        fiberMigrationPercentage:
+        monthlyAggregatedCounts.fiberMigration > 0
+          ? ((monthlyAggregatedCounts.peoTVMigration / monthlyAggregatedCounts.fiberMigration) * 100).toFixed(2)
+          : 0,
+      copperNewPercentage: monthlyAggregatedCounts.copperNew > 0
+        ? ((monthlyAggregatedCounts.peoTVCopperAccess / monthlyAggregatedCounts.copperNew) * 100).toFixed(2)
+        : 0,
+      copperReconPercentage: monthlyAggregatedCounts.copperRecon > 0
+        ? ((monthlyAggregatedCounts.peoTVCopperRecon / monthlyAggregatedCounts.copperRecon) * 100).toFixed(2)
+        : 0,
+    };
+  });
   // Percentage calculations as per your formula
   const fiberNewAccessPercentage =
     aggregatedCounts["FIBER NEW ACCESS BAERER"] > 0
@@ -152,7 +268,31 @@ const FiberStatisticsPage = () => {
           aggregatedCounts["COPPER RECON"]) *
           100).toFixed(2)
       : 0;
-
+// Custom Legend Renderer as Buttons
+const CustomLegend = ({ payload }) => (
+  <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
+    {payload.map((entry) => (
+      <button
+        key={entry.dataKey}
+        onClick={() => handleLegendClick({ dataKey: entry.dataKey })}
+        style={{
+          backgroundColor: lineVisibility[entry.dataKey] ? entry.color : "#ccc",
+          color: "white",
+          padding: "8px 16px",
+          borderRadius: "20px",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "bold",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
+          transition: "background-color 0.3s ease",
+        }}
+      >
+        {entry.value.toUpperCase()}
+      </button>
+    ))}
+  </Box>
+);
   return (
     <Box
       sx={{
@@ -264,6 +404,214 @@ const FiberStatisticsPage = () => {
           </Grid>
         </Grid>
       </Container>
+      <Grid container spacing={4} sx={{ marginTop: 4 }}>
+      <Grid container spacing={4} sx={{ marginTop: 4 }}>
+  {/* Fiber Line Chart */}
+  <Grid item xs={12} md={6}>
+    <Box
+      sx={{
+        background: "rgba(30, 30, 50, 0.9)",
+        borderRadius: 3,
+        padding: 3,
+        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.4)",
+      }}
+    >
+      <Typography variant="h5" sx={{ color: "#FFFFFF", fontWeight: "bold", marginBottom: 2 }}>
+        Fiber Data Trend (Monthly)
+      </Typography>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart
+          data={monthlyData}
+          margin={{ top: 20, right: 30, left: 0, bottom: 10 }}
+          syncId="lineGraphSync"
+        >
+          <defs>
+            <linearGradient id="fiberNewGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0077b6" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#90e0ef" stopOpacity={0.3} />
+            </linearGradient>
+            <linearGradient id="fiberReconGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4caf50" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#4caf50" stopOpacity={0.3} />
+            </linearGradient>
+            <linearGradient id="fiberMigrationGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff8a9c" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#ff8a9c" stopOpacity={0.3} />
+            </linearGradient>
+          </defs>
+
+          {/* Remove grid lines */}
+          <XAxis
+            dataKey="month"
+            tick={{ fill: "#fff" }}
+            interval={0} // Show all months
+            angle={-30}
+            height={60}
+            padding={{ left: 10, right: 10 }}
+          />
+          <YAxis
+            tick={{ fill: "#fff" }}
+            width={50}
+            label={{ value: "Percentage (%)", angle: -90, position: "insideLeft", fill: "#fff" }}
+          />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#0a1f44", color: "#fff", borderRadius: 8 }}
+            formatter={(value, name) => [`${value}%`, `${name}`]}
+            cursor={{ stroke: "#ddd", strokeWidth: 1 }}
+          />
+    <Legend
+  content={<CustomLegend />}
+  layout="horizontal"
+  align="center"
+  verticalAlign="bottom"
+/>
+
+            {/* Conditional rendering of lines */}
+            {lineVisibility.fiberNewPercentage && (
+                <Line
+                  type="monotoneX"
+                  dataKey="fiberNewPercentage"
+                  name="New Access Bearer FTTH %"
+                  stroke="#0077b6"
+                  strokeWidth={3}
+                  dot={{ stroke: "#0077b6", fill: "#0077b6", strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 8 }}
+                  animationDuration={1000}
+                />
+              )}
+              {lineVisibility.fiberReconPercentage && (
+                <Line
+                  type="monotoneX"
+                  dataKey="fiberReconPercentage"
+                  name="Recon FTTH %"
+                  stroke="#4caf50"
+                  strokeWidth={3}
+                  dot={{ stroke: "#4caf50", fill: "#4caf50", strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 8 }}
+                  animationDuration={1200}
+                />
+              )}
+              {lineVisibility.fiberMigrationPercentage && (
+                <Line
+                  type="monotoneX"
+                  dataKey="fiberMigrationPercentage"
+                  name="Migration FTTH %"
+                  stroke="#ff5c6f"
+                  strokeWidth={3}
+                  dot={{ stroke: "#ff5c6f", fill: "#ff5c6f", strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 8 }}
+                  animationDuration={1400}
+                />
+              )}
+        </LineChart>
+      </ResponsiveContainer>
+    </Box>
+  </Grid>
+
+  {/* Copper Line Chart */}
+  <Grid item xs={12} md={6}>
+    <Box
+      sx={{
+        background: "rgba(30, 30, 50, 0.9)",
+        borderRadius: 3,
+        padding: 3,
+        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.4)",
+      }}
+    >
+      <Typography variant="h5" sx={{ color: "#FFFFFF", fontWeight: "bold", marginBottom: 2 }}>
+        Copper Data Trend (Monthly)
+      </Typography>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart
+          data={monthlyData}
+          margin={{ top: 20, right: 30, left: 0, bottom: 10 }}
+          syncId="lineGraphSync"
+        >
+          <defs>
+            <linearGradient id="copperNewGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0077b6" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#0077b6" stopOpacity={0.3} />
+            </linearGradient>
+            <linearGradient id="copperReconGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4caf50" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="#4caf50" stopOpacity={0.3} />
+            </linearGradient>
+          </defs>
+
+          <XAxis
+            dataKey="month"
+            tick={{ fill: "#fff" }}
+            interval={0}
+            angle={-30}
+            height={60}
+            padding={{ left: 10, right: 10 }}
+          />
+          <YAxis
+            tick={{ fill: "#fff" }}
+            width={50}
+            label={{ value: "Percentage (%)", angle: -90, position: "insideLeft", fill: "#fff" }}
+          />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#0a1f44", color: "#fff", borderRadius: 8 }}
+            formatter={(value, name) => [`${value}%`, `${name}`]}
+            cursor={{ stroke: "#ddd", strokeWidth: 1 }}
+          />
+       <Legend
+  content={<CustomLegend />}
+  layout="horizontal"
+  align="center"
+  verticalAlign="bottom"
+/>
+
+{lineVisibility.copperNewPercentage && (
+                <Line
+                  type="monotoneX"
+                  dataKey="copperNewPercentage"
+                  name="New Copper %"
+                  stroke="#0077b6"
+                  strokeWidth={3}
+                  dot={{ stroke: "#0077b6", fill: "#0077b6", strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 8 }}
+                  animationDuration={1000}
+                />
+              )}
+              {lineVisibility.copperReconPercentage && (
+                <Line
+                  type="monotoneX"
+                  dataKey="copperReconPercentage"
+                  name="Recon Copper %"
+                  stroke="#4caf50"
+                  strokeWidth={3}
+                  dot={{ stroke: "#4caf50", fill: "#4caf50", strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 8 }}
+                  animationDuration={1200}
+                />
+              )}
+        </LineChart>
+      </ResponsiveContainer>
+    </Box>
+  </Grid>
+
+  {/* Reset Button */}
+  <Grid item xs={12} sx={{ textAlign: "center", marginTop: 2 }}>
+  <button
+    onClick={resetAllLines} // Reset line visibility when clicked
+    style={{
+      backgroundColor: "#1e90ff",
+      color: "white",
+      padding: "12px 24px",
+      borderRadius: "8px",
+      border: "none",
+      fontSize: "16px",
+      cursor: "pointer",
+      boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.3)",
+    }}
+  >
+    Reset All Lines
+  </button>
+</Grid>
+</Grid>
+</Grid>
     </Box>
   );
 };

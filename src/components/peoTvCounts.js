@@ -11,98 +11,77 @@ import {
   Select,
   MenuItem,
   Button,
+  Collapse,
   Chip,
 } from "@mui/material";
+import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import { getPeoTvCounts } from "../services/api";
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Title, Tooltip, Legend, Filler);
 
 const PeoTvCounts = () => {
   const [counts, setCounts] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDetails, setShowDetails] = useState(false);
 
   // Filters
-  const [selectedYear, setSelectedYear] = useState("all");
-  const [selectedMonth, setSelectedMonth] = useState("all");
-  const [selectedDay, setSelectedDay] = useState("all");
-  const [selectedRtoArea, setSelectedRtoArea] = useState("all");
-  const [selectedDeletedMethod, setSelectedDeletedMethod] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState("");
-  const [selectedDGM, setSelectedDGM] = useState("all");
-  const [selectedGM, setSelectedGM] = useState("all");
+  const [selectedYear, setSelectedYear] = useState(""); // Single-select
+  const [selectedMonths, setSelectedMonths] = useState([]); // Multi-select
+  const [selectedDays, setSelectedDays] = useState([]); // Multi-select
+  const [selectedRtoAreas, setSelectedRtoAreas] = useState([]); // Multi-select
+  const [selectedDeletedMethod, setSelectedDeletedMethod] = useState(""); // Single-select
+  const [selectedDurations, setSelectedDurations] = useState([]); // Multi-select
+  const [selectedDgms, setSelectedDgms] = useState([]); // Multi-select
+  const [selectedGms, setSelectedGms] = useState([]); // Multi-select
 
+  // Dropdown options
   const years = [2023, 2024];
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    { name: "January", value: 1 },
+    { name: "February", value: 2 },
+    { name: "March", value: 3 },
+    { name: "April", value: 4 },
+    { name: "May", value: 5 },
+    { name: "June", value: 6 },
+    { name: "July", value: 7 },
+    { name: "August", value: 8 },
+    { name: "September", value: 9 },
+    { name: "October", value: 10 },
+    { name: "November", value: 11 },
+    { name: "December", value: 12 },
   ];
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
-  const rtoAreas = [
-    "RTO - AD",
-    "RTO - AG",
-    "RTO - AP",
-    "RTO - BC",
-    "RTO - BD",
-    "RTO - BW",
-    "RTO - CW",
-    "RTO - GL",
-    "RTO - GP",
-    "RTO - GQ",
-    "RTO - HB",
-    "RTO - HK",
-    "RTO - HO",
-    "RTO - HR",
-    "RTO - HT",
-    "RTO - JA",
-    "RTO - KE",
-    "RTO - KG",
-    "RTO - KI",
-    "RTO - KL",
-    "RTO - KLY",
-    "RTO - KO",
-    "RTO - KON",
-    "RTO - KT",
-    "RTO - KX",
-    "RTO - KY",
-    "RTO - MB",
-    "RTO - MD",
-    "RTO - MH",
-    "RTO - MLT",
-    "RTO - MRG",
-    "RTO - MT",
-    "RTO - ND",
-    "RTO - NG",
-    "RTO - NTB",
-    "RTO - NW",
-    "RTO - PH",
-    "RTO - PR",
-    "RTO - RM",
-    "RTO - RN",
-    "RTO - TC",
-    "RTO - VA",
-    "RTO - WT",];
+  const rtoAreas = ["RTO - AD", "RTO - AG", "RTO - AP", "RTO - BC", "RTO - BD"];
   const deletedMethods = ["Customer Requested", "Non Payment"];
-  const durations = [
-    "below 1 year", "1 year to 2 years", "2 years to 3 years",
-    "3 years to 4 years", "4 years to 5 years", "more than 5 years"
-  ];
-  const dgms = ["NP", "WPS", "EP", "SAB & UVA", "NWP", "SP", "CP", "WPN", "METRO 1", "METRO 2"];
+  const durations = ["below 1 year", "1 year to 2 years", "2 years to 3 years", "3 years to 4 years", "4 years to 5 years", "more than 5 years"];
+  const dgms = ["NP", "WPS", "EP", "SAB-UVA"];
   const gms = ["REGION 1", "REGION 2", "REGION 3", "METRO"];
 
   const fetchData = async () => {
     try {
       setLoading(true);
-
       const params = {
-        year: selectedYear !== "all" ? selectedYear : undefined,
-        month: selectedMonth !== "all" ? months.indexOf(selectedMonth) + 1 : undefined,
-        day: selectedDay !== "all" ? selectedDay : undefined,
-        order_line_rto_area: selectedRtoArea !== "all" ? selectedRtoArea : undefined,
+        year: selectedYear || undefined,
+        month: selectedMonths.length > 0 ? selectedMonths.join(",") : undefined,
+        day: selectedDays.length > 0 ? selectedDays.join(",") : undefined,
+        order_line_rto_area: selectedRtoAreas.length > 0 ? selectedRtoAreas.join(",") : undefined,
         deleted_method: selectedDeletedMethod || undefined,
-        duration: selectedDuration || undefined,
-        DGM: selectedDGM !== "all" ? selectedDGM : undefined,
-        GM: selectedGM !== "all" ? selectedGM : undefined,
+        duration: selectedDurations.length > 0 ? selectedDurations.join(",") : undefined,
+        dgm: selectedDgms.length > 0 ? selectedDgms.join(",") : undefined,
+        gm: selectedGms.length > 0 ? selectedGms.join(",") : undefined,
       };
-
-      // Clean the params by removing undefined values
       const queryString = Object.keys(params)
         .filter((key) => params[key] !== undefined)
         .map((key) => `${key}=${params[key]}`)
@@ -125,67 +104,52 @@ const PeoTvCounts = () => {
     fetchData();
   };
 
-  // Handle Filter Chips
-  const activeFilters = [
-    { label: selectedYear, name: "Year" },
-    { label: selectedMonth, name: "Month" },
-    { label: selectedDay, name: "Day" },
-    { label: selectedRtoArea, name: "RTO Area" },
-    { label: selectedDeletedMethod, name: "Deleted Method" },
-    { label: selectedDuration, name: "Duration" },
-    { label: selectedDGM, name: "DGM" },
-    { label: selectedGM, name: "GM" },
-  ].filter((filter) => filter.label !== "all");
+  const totalDisconnections = counts
+    ? (counts.total_peotv_with_copper || 0) + (counts.total_peotv_with_fiber || 0) + (counts.total_only_peotv || 0)
+    : 0;
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          background: "linear-gradient(to right, #141E30, #243B55)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <CircularProgress color="secondary" />
-      </Box>
-    );
-  }
+  const filteredMonths = selectedMonths.length > 0 ? selectedMonths : months.map((m) => m.value);
 
-  // Map the keys to human-readable names
-  const mapKeyToLabel = (key) => {
-    switch (key) {
-      case 'peo_tv_copper':
-        return 'PEO TV WITH COPPER';
-      case 'peo_tv_fiber':
-        return 'PEO TV WITH FIBER';
-      case 'peo_tv_disconnections':
-        return 'PEO TV DISCONNECTIONS';
-      default:
-        return key.replace(/_/g, " ").toUpperCase(); // Default behavior for other keys
-    }
-  };
-
-  // Determine gradient based on type
-  const getGradientBackground = (type) => {
-    switch (type) {
-      case 'peo_tv_fiber':
-        return 'linear-gradient(145deg, #0A237D, #0D47A1)'; // Blue gradient for Fiber Disconnections
-      case 'peo_tv_copper':
-        return 'linear-gradient(145deg, #1B5E20, #388E3C)'; // Dark Green gradient for Copper Disconnections
-      case 'peo_tv_disconnections':
-        return 'linear-gradient(145deg, #D35D00, #FF8C00)'; // Orange gradient for PEO TV Disconnections
-      default:
-        return 'linear-gradient(145deg, #8B0000, #FF6347)'; // Red gradient for Other Disconnections
-    }
-  };
+  const monthlyCounts = counts
+    ? {
+        labels: months.filter((m) => filteredMonths.includes(m.value)).map((m) => m.name),
+        datasets: [
+          {
+            label: "PEO TV WITH COPPER",
+            data: filteredMonths.map(() => counts.total_peotv_with_copper / filteredMonths.length),
+            borderColor: "#5cb85c",
+            backgroundColor: "rgba(92, 184, 92, 0.3)",
+            tension: 0.4,
+            pointRadius: 5,
+            fill: true,
+          },
+          {
+            label: "PEO TV WITH FIBER",
+            data: filteredMonths.map(() => counts.total_peotv_with_fiber / filteredMonths.length),
+            borderColor: "#0275d8",
+            backgroundColor: "rgba(2, 117, 216, 0.3)",
+            tension: 0.4,
+            pointRadius: 5,
+            fill: true,
+          },
+          {
+            label: "ONLY PEO TV",
+            data: filteredMonths.map(() => counts.total_only_peotv / filteredMonths.length),
+            borderColor: "#ff9800",
+            backgroundColor: "rgba(255, 152, 0, 0.3)",
+            tension: 0.4,
+            pointRadius: 5,
+            fill: true,
+          },
+        ],
+      }
+    : { labels: [], datasets: [] };
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        background: `url(/BG.jpg)`, // Add background image from public folder
+        background: `url(/BG.jpg)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         padding: 4,
@@ -203,111 +167,154 @@ const PeoTvCounts = () => {
       >
         PEO TV Disconnection Dashboard
       </Typography>
+
+      <Box
+        sx={{
+          backgroundColor: "#673AB7",
+          color: "#fff",
+          borderRadius: 4,
+          padding: 3,
+          marginY: 4,
+          textAlign: "center",
+          fontSize: "2rem",
+          fontWeight: "bold",
+          boxShadow: "0 0 20px rgba(103, 58, 183, 0.8)",
+        }}
+      >
+        Total Disconnections: {totalDisconnections.toLocaleString()}
+      </Box>
+
       <Container maxWidth="lg">
-        {/* Filter Section */}
-        <Grid container spacing={4}>
-          <Grid item xs={12}>
-            <Typography
-              variant="h5"
-              sx={{
-                color: "#00c6ff",
-                fontWeight: "bold",
-                marginBottom: 2,
-                textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
-              }}
-            >
-              Filters
-            </Typography>
-          </Grid>
-          {[
-            { label: "Year", value: selectedYear, options: years, onChange: setSelectedYear },
-            { label: "Month", value: selectedMonth, options: months, onChange: setSelectedMonth },
-            { label: "Day", value: selectedDay, options: days, onChange: setSelectedDay },
-            { label: "RTO Area", value: selectedRtoArea, options: rtoAreas, onChange: setSelectedRtoArea },
-            { label: "Deleted Method", value: selectedDeletedMethod, options: deletedMethods, onChange: setSelectedDeletedMethod },
-            { label: "Duration", value: selectedDuration, options: durations, onChange: setSelectedDuration },
-            { label: "DGM", value: selectedDGM, options: dgms, onChange: setSelectedDGM },
-            { label: "GM", value: selectedGM, options: gms, onChange: setSelectedGM },
-          ].map((filter, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ padding: 2, background: "rgba(255, 255, 255, 0.1)", boxShadow: 3, borderRadius: 2 }}>
-                <FormControl fullWidth>
-                  <InputLabel sx={{ color: "#00c6ff", fontWeight: "bold" }}>{filter.label}</InputLabel>
-                  <Select
-                    value={filter.value}
-                    onChange={(e) => filter.onChange(e.target.value)}
-                    sx={{
-                      color: "#fff",
-                      background: "rgba(0, 0, 0, 0.6)",
-                      "& .MuiSelect-icon": {
+        <Box sx={{ marginBottom: 3 }}>
+          <Typography variant="h5" sx={{ color: "#00c6ff", fontWeight: "bold", marginBottom: 2 }}>
+            Filters
+          </Typography>
+          <Grid container spacing={2}>
+            {[
+              { label: "Year", value: selectedYear, options: years, onChange: setSelectedYear, multiple: false },
+              { label: "Month", value: selectedMonths, options: months, onChange: setSelectedMonths, multiple: true },
+              { label: "Day", value: selectedDays, options: days, onChange: setSelectedDays, multiple: true },
+              { label: "RTO Area", value: selectedRtoAreas, options: rtoAreas, onChange: setSelectedRtoAreas, multiple: true },
+              { label: "Deleted Method", value: selectedDeletedMethod, options: deletedMethods, onChange: setSelectedDeletedMethod, multiple: false },
+              { label: "Duration", value: selectedDurations, options: durations, onChange: setSelectedDurations, multiple: true },
+              { label: "DGM", value: selectedDgms, options: dgms, onChange: setSelectedDgms, multiple: true },
+              { label: "GM", value: selectedGms, options: gms, onChange: setSelectedGms, multiple: true },
+            ].map((filter, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card sx={{ padding: 2, background: "rgba(255, 255, 255, 0.1)", boxShadow: 3, borderRadius: 2 }}>
+                  <FormControl fullWidth>
+                    <InputLabel sx={{ color: "#00c6ff", fontWeight: "bold" }}>{filter.label}</InputLabel>
+                    <Select
+                      multiple={filter.multiple}
+                      value={filter.value}
+                      onChange={(e) => {
+                        filter.onChange(filter.multiple ? e.target.value : e.target.value); // Handle single vs multiple values
+                      }}
+                      sx={{
                         color: "#fff",
-                      },
-                    }}
-                    label={filter.label}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {filter.options.map((option, idx) => (
-                      <MenuItem value={option} key={idx}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Card>
-            </Grid>
-          ))}
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#00c6ff",
-                color: "#fff",
-                fontWeight: "bold",
-                marginTop: 2,
-              }}
-              onClick={applyFilters}
-            >
-              Apply Filters
-            </Button>
-          </Grid>
-        </Grid>
-
-        {/* Filter Chips */}
-        {activeFilters.length > 0 && (
-          <Box sx={{ marginTop: 3 }}>
-            {activeFilters.map((filter, idx) => (
-              <Chip
-                key={idx}
-                label={`${filter.name}: ${filter.label}`}
-                sx={{ margin: 1, backgroundColor: "#00c6ff", color: "#fff" }}
-              />
+                        background: "rgba(0, 0, 0, 0.6)",
+                        "& .MuiSelect-icon": { color: "#fff" },
+                      }}
+                      label={filter.label}
+                      renderValue={(selected) =>
+                        filter.multiple ? (
+                          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                            {selected.map((value) => (
+                              <Chip key={value} label={months.find((m) => m.value === value)?.name || value} color="primary" />
+                            ))}
+                          </Box>
+                        ) : (
+                          selected
+                        )
+                      }
+                    >
+                      {filter.options.map((option, idx) => (
+                        <MenuItem value={option.value || option} key={idx}>
+                          {option.name || option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Card>
+              </Grid>
             ))}
-          </Box>
-        )}
-
-        {/* Display Data */}
-        <Grid container spacing={2} sx={{ marginTop: 3 }}>
-          {counts && Object.keys(counts).map((key, idx) => (
-            <Grid item xs={12} sm={6} md={4} key={idx} sx={{ animation: "fadeIn 0.5s ease-out" }}>
-              <Card
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
                 sx={{
-                  padding: 3,
-                  background: getGradientBackground(key),
+                  backgroundColor: "#00c6ff",
                   color: "#fff",
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  transition: "transform 0.3s",
-                  "&:hover": { transform: "scale(1.05)" },
+                  fontWeight: "bold",
+                  marginTop: 2,
+                  width: "100%",
                 }}
+                onClick={applyFilters}
               >
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  {mapKeyToLabel(key)} {/* Use the map function to update label */}
-                </Typography>
-                <Typography variant="h4">{counts[key]}</Typography>
-              </Card>
+                Apply Filters
+              </Button>
             </Grid>
-          ))}
-        </Grid>
+          </Grid>
+        </Box>
+
+        <Button
+          onClick={() => setShowDetails(!showDetails)}
+          variant="contained"
+          sx={{ backgroundColor: "#673AB7", marginBottom: 2 }}
+          endIcon={showDetails ? <ExpandLess /> : <ExpandMore />}
+        >
+          {showDetails ? "Hide Breakdown" : "Show Breakdown"}
+        </Button>
+        <Collapse in={showDetails}>
+          <Grid container spacing={2} sx={{ marginTop: 3 }}>
+            {counts &&
+              Object.keys(counts)
+                .filter((key) => key !== "total")
+                .map((key, idx) => (
+                  <Grid item xs={12} sm={6} md={4} key={idx}>
+                    <Card
+                      sx={{
+                        padding: 3,
+                        backgroundColor: key === "total" ? "#673AB7" : "#1B5E20",
+                        color: "#fff",
+                        borderRadius: 2,
+                        boxShadow: 3,
+                        textAlign: "center",
+                      }}
+                    >
+                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                        {key.replace(/_/g, " ").toUpperCase()}
+                      </Typography>
+                      <Typography variant="h4">{counts[key].toLocaleString() || 0}</Typography>
+                    </Card>
+                  </Grid>
+                ))}
+          </Grid>
+        </Collapse>
+
+        <Box sx={{ marginY: 4 }}>
+          <Typography variant="h5" sx={{ color: "#fff", marginBottom: 2 }}>
+            Disconnections Pattern (Line Chart)
+          </Typography>
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CircularProgress color="secondary" />
+            </Box>
+          ) : (
+            <Line
+              data={monthlyCounts}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: true },
+                },
+                scales: {
+                  x: { ticks: { color: "#fff" } },
+                  y: { ticks: { color: "#fff", beginAtZero: true } },
+                },
+              }}
+            />
+          )}
+        </Box>
       </Container>
     </Box>
   );
