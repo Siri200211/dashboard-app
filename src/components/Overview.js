@@ -20,7 +20,7 @@ const Overview = () => {
   const [filteredCounts, setFilteredCounts] = useState([]); // For filtered data
   const [loading, setLoading] = useState(true);
   const [hoveredLine, setHoveredLine] = useState("");
-  const [activeLines, setActiveLines] = useState(["NEW ACCESS BAERER", "NEW ON MIGRATION", "UPGRADES", "RECON"]);
+  const [activeLines, setActiveLines] = useState(["NEW ACCESS BEARER", "NEW ON MIGRATION", "UPGRADES", "RECON"]);
 
   // Filters
   const [selectedYear, setSelectedYear] = useState("all");
@@ -116,13 +116,42 @@ const applyFilters = () => {
       </Box>
     );
   }
+  const downloadAsCSV = (data, filename = "filtered_counts.csv") => {
+    if (data.length === 0) {
+      alert("No data to download!");
+      return;
+    }
+  
+    // Convert data to CSV format
+    const csvHeaders = Object.keys(data[0]).join(",") + "\n";
+    const csvRows = data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => `"${value}"`) // Escape values
+          .join(",")
+      )
+      .join("\n");
+  
+    const csvContent = csvHeaders + csvRows;
+  
+    // Create a Blob and download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+  
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const aggregatedCounts = {
-    "Fiber - PEOTV NEW ACCESS BAERER": 0,
+    "Fiber - PEOTV NEW ACCESS BEARER": 0,
     "Fiber - PEOTV NEW ON MIGRATION": 0,
     "Fiber - PEOTV UPGRADES": 0,
     "Fiber - PEOTV RECON": 0,
-    "Copper - PEOTV NEW ACCESS BAERER": 0,
+    "Copper - PEOTV NEW ACCESS BEARER": 0,
     "Copper - PEOTV NEW ON MIGRATION": 0,
     "Copper - PEOTV UPGRADES": 0,
     "Copper - PEOTV RECON": 0,
@@ -132,13 +161,13 @@ const applyFilters = () => {
     const combinedKey = `${item.category} - ${item.serviceType} - ${item.orderType}`;
     switch (combinedKey) {
       case "PEO_NEW_53K - E-IPTV FTTH - CREATE":
-        aggregatedCounts["Fiber - PEOTV NEW ACCESS BAERER"] += item.count;
+        aggregatedCounts["Fiber - PEOTV NEW ACCESS BEARER"] += item.count;
         break;
       case "PEO_NEW_53K - E-IPTV FTTH - CREATE-UPGRD SAME NO":
         aggregatedCounts["Fiber - PEOTV NEW ON MIGRATION"] += item.count;
         break;
       case "PEO_NEW_53K - E-IPTV COPPER - CREATE":
-        aggregatedCounts["Copper - PEOTV NEW ACCESS BAERER"] += item.count;
+        aggregatedCounts["Copper - PEOTV NEW ACCESS BEARER"] += item.count;
         break;
       case "PEO DP BB Up_30K - E-IPTV FTTH - CREATE":
         aggregatedCounts["Fiber - PEOTV UPGRADES"] += item.count;
@@ -156,8 +185,45 @@ const applyFilters = () => {
         break;
     }
   });
-
-  const years = [2023, 2024]; // Example years
+  const downloadMonthlyCounts = (filename = "monthly_counts.csv") => {
+    const csvHeaders = ["Month", "Category", "NEW ACCESS BEARER", "NEW ON MIGRATION", "UPGRADES", "RECON"];
+    const csvRows = [];
+  
+    months.forEach((month, index) => {
+      // Add Fiber counts
+      csvRows.push([
+        month,
+        "Fiber",
+        monthlyCounts.fiber[index]["NEW ACCESS BEARER"],
+        monthlyCounts.fiber[index]["NEW ON MIGRATION"],
+        monthlyCounts.fiber[index]["UPGRADES"],
+        monthlyCounts.fiber[index]["RECON"],
+      ]);
+  
+      // Add Copper counts
+      csvRows.push([
+        month,
+        "Copper",
+        monthlyCounts.copper[index]["NEW ACCESS BEARER"],
+        "N/A", // Copper does not have "NEW ON MIGRATION"
+        monthlyCounts.copper[index]["UPGRADES"],
+        monthlyCounts.copper[index]["RECON"],
+      ]);
+    });
+  
+    const csvContent = [csvHeaders.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
+  
+    // Trigger CSV download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+  
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  const years = [2023, 2024, 2025]; // Example years
   const months = [
     "January",
     "February",
@@ -176,13 +242,13 @@ const applyFilters = () => {
   // Initialize monthly data
 const monthlyCounts = {
   fiber: Array(12).fill(0).map(() => ({
-    "NEW ACCESS BAERER": 0,
+    "NEW ACCESS BEARER": 0,
     "NEW ON MIGRATION": 0,
     "UPGRADES": 0,
     "RECON": 0,
   })),
   copper: Array(12).fill(0).map(() => ({
-    "NEW ACCESS BAERER": 0,
+    "NEW ACCESS BEARER": 0,
     "UPGRADES": 0,
     "RECON": 0,
   })),
@@ -192,35 +258,22 @@ const monthlyCounts = {
 filteredCounts.forEach((item) => {
   const monthIndex = item.month - 1; // Convert to 0-indexed (January = 0)
   if (item.category === "PEO_NEW_53K" && item.serviceType.includes("FTTH")) {
-    switch (item.orderType) {
-      case "CREATE":
-        monthlyCounts.fiber[monthIndex]["NEW ACCESS BAERER"] += item.count;
-        break;
-      case "CREATE-UPGRD SAME NO":
-        monthlyCounts.fiber[monthIndex]["NEW ON MIGRATION"] += item.count;
-        break;
-      
-      default:
-        break;
+    if (item.orderType === "CREATE") {
+      monthlyCounts.fiber[monthIndex]["NEW ACCESS BEARER"] += item.count;
+    } else if (item.orderType === "CREATE-UPGRD SAME NO") {
+      monthlyCounts.fiber[monthIndex]["NEW ON MIGRATION"] += item.count;
     }
   } else if (item.category === "PEO_NEW_53K" && item.serviceType.includes("COPPER")) {
-    switch (item.orderType) {
-      case "CREATE":
-        monthlyCounts.copper[monthIndex]["NEW ACCESS BAERER"] += item.count;
-        break;
-      default:
-        break;
+    if (item.orderType === "CREATE") {
+      monthlyCounts.copper[monthIndex]["NEW ACCESS BEARER"] += item.count;
     }
-  }
-
-  else if (item.category === "PEO DP BB Up_30K") {
+  } else if (item.category === "PEO DP BB Up_30K") {
     if (item.serviceType.includes("FTTH")) {
       monthlyCounts.fiber[monthIndex]["UPGRADES"] += item.count;
     } else if (item.serviceType.includes("COPPER")) {
       monthlyCounts.copper[monthIndex]["UPGRADES"] += item.count;
     }
-  }
-  else if (item.category === "PEO_REC_6K") {
+  } else if (item.category === "PEO_REC_6K") {
     if (item.serviceType.includes("FTTH")) {
       monthlyCounts.fiber[monthIndex]["RECON"] += item.count;
     } else if (item.serviceType.includes("COPPER")) {
@@ -228,12 +281,11 @@ filteredCounts.forEach((item) => {
     }
   }
 });
-
 // Line chart data for Fiber
 // Line chart data for Fiber
 const lineDataFiber = months.map((month, index) => ({
   month,
-  "NEW ACCESS BAERER": monthlyCounts.fiber[index]["NEW ACCESS BAERER"],
+  "NEW ACCESS BEARER": monthlyCounts.fiber[index]["NEW ACCESS BEARER"],
   "NEW ON MIGRATION": monthlyCounts.fiber[index]["NEW ON MIGRATION"],
   "UPGRADES": monthlyCounts.fiber[index]["UPGRADES"],
   "RECON": monthlyCounts.fiber[index]["RECON"],
@@ -242,7 +294,7 @@ const lineDataFiber = months.map((month, index) => ({
 // Line chart data for Copper
 const lineDataCopper = months.map((month, index) => ({
   month,
-  "NEW ACCESS BAERER": monthlyCounts.copper[index]["NEW ACCESS BAERER"],
+  "NEW ACCESS BEARER": monthlyCounts.copper[index]["NEW ACCESS BEARER"],
   "UPGRADES": monthlyCounts.copper[index]["UPGRADES"],
   "RECON": monthlyCounts.copper[index]["RECON"],
 }));
@@ -535,7 +587,7 @@ const lineDataCopper = months.map((month, index) => ({
   content={
     <CustomLegend
       payload={[
-        { value: "NEW ACCESS BAERER", dataKey: "NEW ACCESS BAERER", color: "#00bfff" },
+        { value: "NEW ACCESS BEARER", dataKey: "NEW ACCESS BEARER", color: "#00bfff" },
         { value: "NEW ON MIGRATION", dataKey: "NEW ON MIGRATION", color: "#ff6384" },
         { value: "UPGRADES", dataKey: "UPGRADES", color: "#ffc658" },
         { value: "RECON", dataKey: "RECON", color: "#4caf50" },
@@ -545,12 +597,12 @@ const lineDataCopper = months.map((month, index) => ({
     />
   }
 />
-          {activeLines.includes("NEW ACCESS BAERER") && (
+          {activeLines.includes("NEW ACCESS BEARER") && (
             <Line
               type="monotone"
-              dataKey="NEW ACCESS BAERER"
+              dataKey="NEW ACCESS BEARER"
               stroke="#00bfff"
-              strokeWidth={hoveredLine === "NEW ACCESS BAERER" ? 5 : 3}
+              strokeWidth={hoveredLine === "NEW ACCESS BEARER" ? 5 : 3}
               dot={{ r: 6, fill: "#00bfff" }}
               activeDot={{ r: 10, strokeWidth: 2, fill: "#00e1ff" }}
             />
@@ -622,7 +674,7 @@ const lineDataCopper = months.map((month, index) => ({
             content={
               <CustomLegend
                 payload={[
-                  { value: "NEW ACCESS BAERER", dataKey: "NEW ACCESS BAERER", color: "#00bfff" },
+                  { value: "NEW ACCESS BEARER", dataKey: "NEW ACCESS BEARER", color: "#00bfff" },
                   { value: "UPGRADES", dataKey: "UPGRADES", color: "#ffc658" },
                   { value: "RECON", dataKey: "RECON", color: "#4caf50" },
                 ]}
@@ -631,12 +683,12 @@ const lineDataCopper = months.map((month, index) => ({
               />
             }
           />
-          {activeLines.includes("NEW ACCESS BAERER") && (
+          {activeLines.includes("NEW ACCESS BEARER") && (
             <Line
               type="monotone"
-              dataKey="NEW ACCESS BAERER"
+              dataKey="NEW ACCESS BEARER"
               stroke="#00bfff"
-              strokeWidth={hoveredLine === "NEW ACCESS BAERER" ? 5 : 3}
+              strokeWidth={hoveredLine === "NEW ACCESS BEARER" ? 5 : 3}
               dot={{ r: 6, fill: "#00bfff" }}
               activeDot={{ r: 10, strokeWidth: 2, fill: "#00e1ff" }}
             />
@@ -669,7 +721,7 @@ const lineDataCopper = months.map((month, index) => ({
   {/* Reset Button outside Grid */}
    <Box textAlign="center" marginTop={3}>
      <Button
-       onClick={() => setActiveLines(["NEW ACCESS BAERER", "NEW ON MIGRATION", "UPGRADES", "RECON"])}
+       onClick={() => setActiveLines(["NEW ACCESS BEARER", "NEW ON MIGRATION", "UPGRADES", "RECON"])}
        variant="contained"
        sx={{
          backgroundColor: "#1e88e5",
@@ -680,8 +732,31 @@ const lineDataCopper = months.map((month, index) => ({
      >
        Reset All Lines
      </Button>
+     <Grid container spacing={2} justifyContent="center" sx={{ marginBottom: 4 }}>
+</Grid>
    </Box>
       </Container>
+        {/* Add the Download CSV Button */}
+        <Grid item xs={12} sm={4} md={3}>
+  <Button
+    variant="contained"
+    fullWidth
+    onClick={downloadMonthlyCounts}
+    sx={{
+      padding: "6px", // Reduced padding
+      fontSize: "0.875rem", // Smaller font size
+      fontWeight: "bold",
+      textTransform: "none",
+      backgroundColor: "#1e88e5",
+      color: "#fff",
+      borderRadius: "6px", // Smaller border radius
+      ":hover": { backgroundColor: "#1565c0" },
+      width: "300px", // Ensure it respects the max width
+    }}
+  >
+   Export Monthly Counts as CSV
+  </Button>
+</Grid>
     </Box>
   );
 };

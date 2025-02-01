@@ -110,7 +110,7 @@ useEffect(() => {
           <p>Explore PEO TV reports and data.</p>
         </Link>
         <Link to="/fiber" className="home-card">
-          <h2>Fiber</h2>
+          <h2>Access Bearer</h2>
           <p>Access Fiber service reports and statistics.</p>
         </Link>
         <Link to="/statistics" className="home-card">

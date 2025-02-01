@@ -227,6 +227,7 @@ const HomePageNew = () => {
       >
         <Typography variant="body2" sx={{ marginBottom: 2 }}>
           &copy; 2024 PEOTV Reports. All rights reserved.
+          &copy;Sirimanne
         </Typography>
         <div>
           <a

@@ -28,7 +28,7 @@ const FiberOrders = () => {
   const [filteredCounts, setFilteredCounts] = useState([]);
   const [activeFilters, setActiveFilters] = useState([]);
   const [hoveredLine, setHoveredLine] = useState("");  
-  const [activeLines, setActiveLines] = useState(["NEW ACCESS BAERER", "NEW ON MIGRATION", "UPGRADES", "RECON"]);
+  const [activeLines, setActiveLines] = useState(["NEW ACCESS BEARER", "NEW ON MIGRATION", "UPGRADES", "RECON"]);
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -130,7 +130,7 @@ const handleToggleLine = (line) => {
   }
 
   const aggregatedCounts = {
-    "Fiber - NEW ACCESS BAERER": 0,
+    "Fiber - NEW ACCESS BEARER": 0,
     "Fiber - NEW ON MIGRATION": 0,
     "Fiber - RECON": 0,
     "Copper - NEW": 0,
@@ -141,7 +141,7 @@ const handleToggleLine = (line) => {
     const combinedKey = `${item.category} - ${item.serviceType} - ${item.orderType}`;
     switch (combinedKey) {
       case "FTTH_NEW_132K - AB-FTTH - CREATE":
-        aggregatedCounts["Fiber - NEW ACCESS BAERER"] += item.count;
+        aggregatedCounts["Fiber - NEW ACCESS BEARER"] += item.count;
         break;
       case "FTTH_NEW_132K - AB-FTTH - CREATE-UPGRD SAME NO":
         aggregatedCounts["Fiber - NEW ON MIGRATION"] += item.count;
@@ -169,58 +169,47 @@ const handleToggleLine = (line) => {
   // Monthly Data Aggregation
 const monthlyCounts = {
   fiber: Array(12).fill(0).map(() => ({
-    "NEW ACCESS BAERER": 0,
+    "NEW ACCESS BEARER": 0,
     "RECON": 0,
     "NEW ON MIGRATION": 0,
   })),
   copper: Array(12).fill(0).map(() => ({
-    "NEW ACCESS BAERER": 0,
+    "NEW ACCESS BEARER": 0,
     "RECON": 0,
   })),
 };
 
 filteredCounts.forEach((item) => {
   const monthIndex = item.month - 1; // Convert month to 0-indexed
-   // Fiber category mappings
-   if (item.category.includes("FTTH") && item.serviceType.includes("FTTH")) {
-    switch (item.orderType) {
-      case "CREATE": // New access bearer
-        monthlyCounts.fiber[monthIndex]["NEW ACCESS BAERER"] += item.count;
-        break;
-      case "CREATE-UPGRD SAME NO": // Migration upgrades
-        monthlyCounts.fiber[monthIndex]["NEW ON MIGRATION"] += item.count;
-        break;
-      case "CREATE-RECON": // Reconnections
-        monthlyCounts.fiber[monthIndex]["RECON"] += item.count; // Ensure correct mapping for reconnections
-        break;
-      default:
-        break;
+
+  if (item.category.includes("FTTH") && item.serviceType.includes("FTTH")) {
+    // Fiber category mappings
+    if (item.orderType === "CREATE") {
+      monthlyCounts.fiber[monthIndex]["NEW ACCESS BEARER"] += item.count;
+    } else if (item.orderType === "CREATE-UPGRD SAME NO") {
+      monthlyCounts.fiber[monthIndex]["NEW ON MIGRATION"] += item.count;
+    } else if (item.orderType === "CREATE-RECON") {
+      monthlyCounts.fiber[monthIndex]["RECON"] += item.count;
     }
-  
   } else if (item.category === "Other" && item.serviceType.includes("CAB")) {
-    switch (item.orderType) {
-      case "CREATE":
-        monthlyCounts.copper[monthIndex]["NEW ACCESS BAERER"] += item.count;
-        break;
-      case "CREATE-RECON":
-        monthlyCounts.copper[monthIndex]["RECON"] += item.count;
-        break;
-      default:
-        break;
+    // Copper category mappings
+    if (item.orderType === "CREATE") {
+      monthlyCounts.copper[monthIndex]["NEW ACCESS BEARER"] += item.count;
+    } else if (item.orderType === "CREATE-RECON") {
+      monthlyCounts.copper[monthIndex]["RECON"] += item.count;
     }
   }
 });
-
 const lineDataFiber = months.map((month, index) => ({
   month,
-  "NEW ACCESS BAERER": monthlyCounts.fiber[index]["NEW ACCESS BAERER"],
+  "NEW ACCESS BEARER": monthlyCounts.fiber[index]["NEW ACCESS BEARER"],
   "NEW ON MIGRATION": monthlyCounts.fiber[index]["NEW ON MIGRATION"],
   "RECON": monthlyCounts.fiber[index]["RECON"],
 }));
 
 const lineDataCopper = months.map((month, index) => ({
   month,
-  "NEW ACCESS BAERER": monthlyCounts.copper[index]["NEW ACCESS BAERER"],
+  "NEW ACCESS BEARER": monthlyCounts.copper[index]["NEW ACCESS BEARER"],
   "RECON": monthlyCounts.copper[index]["RECON"],
 }));
   const COLORS = [
@@ -237,7 +226,182 @@ const lineDataCopper = months.map((month, index) => ({
     .reduce((total, key) => total + aggregatedCounts[key], 0);
 
   const grandTotal = (totalFiber + totalCopper).toLocaleString(); // Grand total with commas
-
+  const exportMonthlyCountsAsCSV = () => {
+    const csvHeaders = ["Month", "Category", "Count"];
+    const csvRows = [];
+  
+    // Fiber Categories
+    months.forEach((month, index) => {
+      Object.keys(monthlyCounts.fiber[index]).forEach((category) => {
+        csvRows.push([month, `Fiber - ${category}`, monthlyCounts.fiber[index][category]]);
+      });
+    });
+  
+    // Copper Categories
+    months.forEach((month, index) => {
+      Object.keys(monthlyCounts.copper[index]).forEach((category) => {
+        csvRows.push([month, `Copper - ${category}`, monthlyCounts.copper[index][category]]);
+      });
+    });
+  
+    const csvContent = [csvHeaders.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
+  
+    // Create a Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "monthly_counts.csv";
+  
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  const preparePivotData = () => {
+    const pivotData = {};
+  
+    // Initialize pivot structure for each month
+    months.forEach((month) => {
+      pivotData[month] = {
+        "Fiber - NEW ACCESS BEARER": 0,
+        "Fiber - RECON": 0,
+        "Fiber - NEW ON MIGRATION": 0,
+        "Copper - NEW ACCESS BEARER": 0,
+        "Copper - RECON": 0,
+      };
+    });
+  
+    // Populate counts
+    counts.forEach((item) => {
+      const monthName = months[item.month - 1]; // Get month name (0-indexed)
+      if (!monthName) return; // Skip invalid months
+  
+      let categoryKey = "";
+  
+      // Determine the correct category key
+      if (item.category.includes("FTTH")) {
+        if (item.orderType === "CREATE") categoryKey = "Fiber - NEW ACCESS BEARER";
+        else if (item.orderType === "CREATE-UPGRD SAME NO")
+          categoryKey = "Fiber - NEW ON MIGRATION";
+        else if (item.orderType === "CREATE-RECON") categoryKey = "Fiber - RECON";
+      } else if (item.category.includes("CAB")) {
+        if (item.orderType === "CREATE") categoryKey = "Copper - NEW ACCESS BEARER";
+        else if (item.orderType === "CREATE-RECON") categoryKey = "Copper - RECON";
+      }
+  
+      // Increment counts
+      if (categoryKey && pivotData[monthName][categoryKey] !== undefined) {
+        pivotData[monthName][categoryKey] += item.count;
+      }
+    });
+  
+    // Convert to array format for CSV export
+    return Object.entries(pivotData).map(([month, data]) => ({
+      Month: month,
+      ...data,
+    }));
+  };
+  const downloadMonthlyCountsAsCSV = (filename = "monthly_counts.csv") => {
+    // Prepare CSV headers
+    const csvHeaders = ["Month", "Category", "Count"];
+    
+    // Prepare CSV rows
+    const csvRows = filteredCounts.map((item) => [
+      months[item.month - 1], // Convert numeric month to name (January, etc.)
+      item.category.includes("Fiber") ? `Fiber - ${item.orderType}` : `Copper - ${item.orderType}`,
+      item.count,
+    ]);
+  
+    // Combine headers and rows
+    const csvContent = [csvHeaders.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
+  
+    // Create a Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  const exportPivotDataAsCSV = () => {
+    const pivotData = preparePivotData();
+  
+    // Define headers
+    const headers = [
+      "Month",
+      "Fiber - NEW ACCESS BEARER",
+      "Fiber - RECON",
+      "Fiber - NEW ON MIGRATION",
+      "Copper - NEW ACCESS BEARER",
+      "Copper - RECON",
+    ];
+  
+    // Convert data rows to CSV format
+    const csvRows = pivotData.map((row) =>
+      headers.map((header) => row[header] || 0).join(",")
+    );
+  
+    // Create full CSV content
+    const csvContent = [headers.join(","), ...csvRows].join("\n");
+  
+    // Trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "monthly_counts_pivot.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  const exportFormattedMonthlyCountsAsCSV = () => {
+    const headers = [
+      "Month",
+      "Category",
+      "NEW ACCESS BEARER",
+      "NEW ON MIGRATION",
+      "RECON",
+    ];
+  
+    const transformedData = months.map((month, index) => {
+      const fiberRow = {
+        Month: month,
+        Category: "Fiber",
+        "NEW ACCESS BEARER": monthlyCounts.fiber[index]["NEW ACCESS BEARER"] || "N/A",
+        "NEW ON MIGRATION": monthlyCounts.fiber[index]["NEW ON MIGRATION"] || "N/A",
+        UPGRADES: monthlyCounts.fiber[index]["UPGRADES"] || "N/A",
+        RECON: monthlyCounts.fiber[index]["RECON"] || "N/A",
+      };
+  
+      const copperRow = {
+        Month: month,
+        Category: "Copper",
+        "NEW ACCESS BEARER": monthlyCounts.copper[index]["NEW ACCESS BEARER"] || "N/A",
+        "NEW ON MIGRATION": "N/A", // Copper does not have this field
+        UPGRADES: monthlyCounts.copper[index]["UPGRADES"] || "N/A",
+        RECON: monthlyCounts.copper[index]["RECON"] || "N/A",
+      };
+  
+      return [fiberRow, copperRow];
+    });
+  
+    const csvRows = [
+      headers.join(","), // Add headers
+      ...transformedData.flat().map((row) =>
+        headers.map((header) => row[header] || "0").join(",")
+      ),
+    ];
+  
+    const csvContent = csvRows.join("\n");
+  
+    // Trigger CSV download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "formatted_monthly_counts.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     <Box sx={{ 
       minHeight: "100vh", 
@@ -256,7 +420,7 @@ const lineDataCopper = months.map((month, index) => ({
           textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)"
         }}
       >
-        ACCESS BAERER DAILY SALES REPORT
+        ACCESS BEARER DAILY SALES REPORT
       </Typography>
       <Typography 
         variant="h4" 
@@ -498,7 +662,7 @@ const lineDataCopper = months.map((month, index) => ({
                 content={
                   <CustomLegend
                     payload={[
-                      { value: "NEW ACCESS BAERER", dataKey: "NEW ACCESS BAERER", color: "#00bfff" },
+                      { value: "NEW ACCESS BEARER", dataKey: "NEW ACCESS BEARER", color: "#00bfff" },
                       { value: "NEW ON MIGRATION", dataKey: "NEW ON MIGRATION", color: "#ff6384" },
                       { value: "UPGRADES", dataKey: "UPGRADES", color: "#ffc658" },
                       { value: "RECON", dataKey: "RECON", color: "#4caf50" },
@@ -508,8 +672,8 @@ const lineDataCopper = months.map((month, index) => ({
                   />
                 }
               />
-              {activeLines.includes("NEW ACCESS BAERER") && (
-                <Line type="monotone" dataKey="NEW ACCESS BAERER" stroke="#00bfff" strokeWidth={4} dot={{ r: 5 }} />
+              {activeLines.includes("NEW ACCESS BEARER") && (
+                <Line type="monotone" dataKey="NEW ACCESS BEARER" stroke="#00bfff" strokeWidth={4} dot={{ r: 5 }} />
               )}
               {activeLines.includes("NEW ON MIGRATION") && (
                 <Line type="monotone" dataKey="NEW ON MIGRATION" stroke="#ff6384" strokeWidth={4} dot={{ r: 5 }} />
@@ -552,7 +716,7 @@ const lineDataCopper = months.map((month, index) => ({
                 content={
                   <CustomLegend
                     payload={[
-                      { value: "NEW ACCESS BAERER", dataKey: "NEW ACCESS BAERER", color: "#00bfff" },
+                      { value: "NEW ACCESS BEARER", dataKey: "NEW ACCESS BEARER", color: "#00bfff" },
                       { value: "RECON", dataKey: "RECON", color: "#4caf50" },
                     ]}
                     onToggle={handleToggleLine}
@@ -560,8 +724,8 @@ const lineDataCopper = months.map((month, index) => ({
                   />
                 }
               />
-              {activeLines.includes("NEW ACCESS BAERER") && (
-                <Line type="monotone" dataKey="NEW ACCESS BAERER" stroke="#00bfff" strokeWidth={4} dot={{ r: 5 }} />
+              {activeLines.includes("NEW ACCESS BEARER") && (
+                <Line type="monotone" dataKey="NEW ACCESS BEARER" stroke="#00bfff" strokeWidth={4} dot={{ r: 5 }} />
               )}
               {activeLines.includes("RECON") && (
                 <Line type="monotone" dataKey="RECON" stroke="#4caf50" strokeWidth={4} dot={{ r: 5 }} />
@@ -575,7 +739,7 @@ const lineDataCopper = months.map((month, index) => ({
   {/* Reset Button outside Grid */}
   <Box textAlign="center" marginTop={3}>
     <Button
-      onClick={() => setActiveLines(["NEW ACCESS BAERER", "NEW ON MIGRATION", "UPGRADES", "RECON"])}
+      onClick={() => setActiveLines(["NEW ACCESS BEARER", "NEW ON MIGRATION", "UPGRADES", "RECON"])}
       variant="contained"
       sx={{
         backgroundColor: "#1e88e5",
@@ -591,7 +755,22 @@ const lineDataCopper = months.map((month, index) => ({
 </Container>
 </Box>
       </Container>
+      <Button
+  variant="contained"
+  onClick={exportFormattedMonthlyCountsAsCSV}
+  sx={{
+    padding: "10px 20px",
+    backgroundColor: "#1e88e5",
+    color: "#fff",
+    borderRadius: "8px",
+    fontWeight: "bold",
+    ":hover": { backgroundColor: "#1565c0" },
+  }}
+>
+  Export Monthly Counts as CSV
+</Button>
     </Box>
+    
   );
 };
 
