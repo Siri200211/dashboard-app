@@ -1,86 +1,156 @@
 /* Page Container */
 .csv-container {
-    font-family: 'Arial', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to bottom right, #0571eb, #222);
-    text-align: center;
-    color: white;
-  }
-  
-  /* Upload Box */
+  font-family: "Arial", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0571eb, #222);
+  padding: 20px;
+}
+
+/* Upload Box */
+.csv-box {
+  background: #ffffff; /* Solid white for maximum contrast */
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 500px;
+  transition: transform 0.3s ease;
+  color: #333; /* Default text color inside box for readability */
+}
+
+.csv-box:hover {
+  transform: translateY(-5px);
+}
+
+/* Title */
+.csv-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #0571eb; /* Blue title stands out against white */
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Input */
+.csv-input {
+  margin-bottom: 20px;
+}
+
+/* Material-UI Overrides for Consistency */
+.MuiTextField-root,
+.MuiFormControl-root {
+  margin-bottom: 16px;
+}
+
+.MuiInputLabel-root {
+  color: #555; /* Darker gray for labels */
+  font-weight: 500;
+}
+
+.MuiOutlinedInput-root {
+  border-radius: 8px;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #0571eb;
+}
+
+.MuiOutlinedInput-input {
+  color: #333; /* Ensure input text is dark and readable */
+}
+
+/* Select Dropdown Text */
+.MuiMenuItem-root {
+  color: #333; /* Dark text for dropdown items */
+}
+
+/* Buttons */
+.csv-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.MuiButton-root {
+  padding: 10px 24px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.MuiButton-containedPrimary {
+  background-color: #0571eb;
+}
+
+.MuiButton-containedPrimary:hover {
+  background-color: #005bb5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(5, 113, 235, 0.3);
+}
+
+.MuiButton-containedSecondary {
+  background-color: #eb5705;
+}
+
+.MuiButton-containedSecondary:hover {
+  background-color: #d35400;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(235, 87, 5, 0.3);
+}
+
+/* Progress Section */
+.csv-progress {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.MuiCircularProgress-root {
+  color: #0571eb;
+}
+
+.csv-percentage {
+  margin-top: 8px;
+  color: #444;
+  font-weight: 500;
+}
+
+/* Message */
+.csv-message {
+  margin-top: 20px;
+  color: #e63946;
+  font-weight: 500;
+  background: rgba(230, 57, 70, 0.1);
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
   .csv-box {
-    background: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
-    padding: 40px 30px;
-    border-radius: 10px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
-    width: 400px;
-    max-width: 90%;
+    padding: 20px;
+    max-width: 100%;
   }
-  
-  /* Title */
+
   .csv-title {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #0571eb;
-    font-weight: bold;
+    font-size: 1.8rem;
   }
-  
-  /* Input */
-  .csv-input {
-    width: 100%;
-    margin-bottom: 20px;
+
+  .MuiButton-root {
+    padding: 8px 16px;
+    font-size: 0.9rem;
   }
-  
-  /* Buttons */
+
   .csv-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    flex-direction: column;
+    gap: 12px;
   }
-  
-  .csv-button {
-    flex: 1;
-    padding: 10px 15px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 5px;
-    background-color: #0571eb;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+
+  .MuiGrid-item {
+    padding: 0;
   }
-  
-  .csv-button.replace {
-    background-color: #eb5705;
-  }
-  
-  .csv-button:hover {
-    background-color: #005bb5;
-    transform: scale(1.05);
-  }
-  
-  .csv-button.replace:hover {
-    background-color: #d35400;
-  }
-  
-  /* Progress Section */
-  .csv-progress {
-    margin-top: 20px;
-    text-align: center;
-  }
-  
-  .csv-percentage {
-    margin-top: 10px;
-    color: #333;
-  }
-  
-  /* Message */
-  .csv-message {
-    margin-top: 20px;
-    color: #333;
-  }
-  
+}

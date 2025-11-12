@@ -16,6 +16,8 @@ import Dis from "./components/PeoTvDisconnectionChart";
 import Combine from "./components/UnifiedPeoTvDashboard";
 import SignUp from "./components/SignUp";
 import PrivateAdminRoute from "./components/PrivateAdminRoute";
+import CountsTable from "./components/CountsTable";
+
 
 function PrivateRoute({ children }) {
   const isLoggedIn = !!localStorage.getItem("token"); // Check if token exists
@@ -89,11 +91,27 @@ function App() {
             </PrivateRoute>
           }
         />
+         <Route
+          path="/hh"
+          element={
+            <PrivateRoute>
+           <hh />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/import"
           element={
             <PrivateRoute>
               <CsvUploadPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/table"
+          element={
+            <PrivateRoute>
+              <CountsTable />
             </PrivateRoute>
           }
         />

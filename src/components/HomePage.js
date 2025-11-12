@@ -105,8 +105,8 @@ useEffect(() => {
           <h2>Combined Reports</h2>
           <p>View all sales data in one place.</p>
         </Link>
-        <Link to="/peo" className="home-card">
-          <h2>PEO TV</h2>
+        <Link to="/peotv" className="home-card">
+          <h2>PEO TV </h2>
           <p>Explore PEO TV reports and data.</p>
         </Link>
         <Link to="/fiber" className="home-card">
@@ -117,6 +117,7 @@ useEffect(() => {
           <h2>Statistics</h2>
           <p>Dive into detailed statistical insights.</p>
         </Link>
+       
       </div>
     </Box>
   );
